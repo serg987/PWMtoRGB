@@ -2,7 +2,7 @@
 * rgbPwm.h
 *
 * Created: 8/15/2021 11:04:24 PM
-*  Author: user
+*  Author: Sergey Kiselev
 */
 
 #define outR DDB0
@@ -33,22 +33,27 @@ volatile uint16_t expandedG = 0;
 volatile uint16_t expandedB = 0;
 volatile bool transitionOver = false;
 
+typedef struct Color{
+	uint8_t r;
+	uint8_t g;
+	uint8_t b;
+} Color;
+
 void initPwm() {
 	// port config
-	portDDR = (1 << outR) | (1 << outG) | (1 << outB);
+	portDDR |= (1 << outR) | (1 << outG) | (1 << outB);
 	
 	// Timer 0 config
 	TCCR0A = (1 << WGM01) | (1 << WGM00) | (1 << COM0A1) | (1 << COM0B1); // Fast PWM non-inverting mode
-	TCCR0B = (1 << CS02); // CK / 256
+	TCCR0B = (1 << CS01) | (1 << CS00); // CK / 64
 	// Interrupts for Timer0
 	TIMSK |= (1 << TOIE0);
 	sei();
 	
-	
 	// Timer 1  config
-	TCCR1 =  (1 << CS13) | (1 << CS10); // CK/256
-	GTCCR = (1 << PWM1B) | (2 << COM1B0); // Enable PWM1B non inverting mode
-	OCR1C = 255; // setting the TOP
+	TCCR1 |=  (1 << CS12) | (1 << CS11) | (1 << CS10); // CK/64
+	GTCCR |= (1 << PWM1B) | (1 << COM1B0); // Enable PWM1B non inverting mod
+	OCR1C = 255;
 }
 
 uint8_t fMax(int16_t a, int16_t b, int16_t c) {
@@ -63,14 +68,14 @@ uint8_t fMax(int16_t a, int16_t b, int16_t c) {
 	}
 }
 
-void setTargetRgb(uint8_t r, uint8_t g, uint8_t b) {
+void setTargetRgb(Color color) {
 	transitionOver = false;
-	targetR = r;
-	targetG = g;
-	targetB = b;
-	int16_t changeR = r - currentR;
-	int16_t changeG = g - currentG;
-	int16_t changeB = b - currentB;
+	targetR = color.r;
+	targetG = color.g;
+	targetB = color.b;
+	int16_t changeR = targetR - currentR;
+	int16_t changeG = targetG - currentG;
+	int16_t changeB = targetB - currentB;
 	int16_t	maxSteps = fMax(abs(changeR), abs(changeG), abs(changeB));
 	deltaR = (changeR << 7) / maxSteps;
 	deltaG = (changeG << 7) / maxSteps;

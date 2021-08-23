@@ -133,6 +133,9 @@
     </ToolchainSettings>
   </PropertyGroup>
   <ItemGroup>
+    <Compile Include="adcIO.h">
+      <SubType>compile</SubType>
+    </Compile>
     <Compile Include="main.c">
       <SubType>compile</SubType>
     </Compile>
@@ -142,6 +145,9 @@
   </ItemGroup>
   <ItemGroup>
     <None Include=".gitignore">
+      <SubType>compile</SubType>
+    </None>
+    <None Include="Readme.md">
       <SubType>compile</SubType>
     </None>
   </ItemGroup>
