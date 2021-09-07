@@ -14,6 +14,9 @@ If PWM duty cycle is less than set by the resistor, the working mode is 'rainbow
 the color of corresponding duty cycle value. So, by turning variable resistor to GND point, it is possible to turn 'rainbow' mode off and 
 show only 'PWM load', and turning to VCC point - to turn off 'PWM' and enabling only 'rainbow'.
 
+- inverting DC
+- stab 5v
+
 ###Current status
 works in simulator
 

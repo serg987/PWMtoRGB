@@ -13,7 +13,8 @@
 #include <stdint.h>
 
 #define countsToAdcMeasure 255
-#define pwmFullAdc 235 // since pwmAdc cannot be 5v at 100% pwm, this defines what level of ADC we are considering as 100%
+#define pwmFullAdc 11 // since pwmAdc cannot be 5v at 100% pwm, this defines what level of ADC we are considering as 100%
+						// and since we are inverting DC, it will be ~0.2V for 100% PWM
 #define compareHysteresis 10 // will realize some hysteresis to avoid flickering around compare level
 
 /*
@@ -30,9 +31,11 @@ Current status: works; is needed to check PWM signal U and F and choose a right 
 */
 
 const Color rainbowArr[7] = {{.r = 255, .g = 0, .b = 2}, {.r = 255, .g = 165, .b = 2}, {.r = 255, .g = 255, .b = 2}, {.r = 0, .g = 241, .b = 20}, {.r = 0, .g = 0, .b = 255}, {.r = 75, .g = 0, .b = 130}, {.r = 168, .g = 0, .b = 255}};
-const Color zeroPWM = {.r = 0, .g = 255, .b =0}; // Green if PWM = 0%
-const Color halfPwm = {.r = 255, .g = 255, .b =0}; // Orange if PWM=50%
-const Color fullPwm = {.r = 255, .g = 0, .b =0}; // red if PWM=100%
+const Color zeroPWM = {.r = 0, .g = 255, .b = 0}; // Green if PWM = 0%
+const Color halfPwm = {.r = 255, .g = 255, .b = 0}; // Orange if PWM=50%
+const Color fullPwm = {.r = 255, .g = 0, .b = 0}; // red if PWM=100%
+	
+const uint8_t middleOfPWMRange = (255 - pwmFullAdc) / 2;
 
 uint8_t dotInBetween(uint8_t y1, uint8_t y2, uint8_t x12, uint8_t x) {
 	int16_t diff = y2 - y1;
@@ -57,15 +60,17 @@ int main(void)
 	while (1)
 	{
 		if (transitionOver) {
-			uint8_t pwm = getPwmAdc();
+			uint8_t pwmMeasured = getPwmAdc();
+			if (pwmMeasured < pwmFullAdc) pwmMeasured = pwmFullAdc;
+			uint8_t pwm = 255 - pwmMeasured;
 			uint8_t compare = getCompareAdc();
 			aboveCompare = pwm > (compare - compareHysteresis * (aboveCompare));
 			
 			if (aboveCompare) {
-				if (pwm > pwmFullAdc / 2) {
-					setTargetRgb(setColorInBetween(halfPwm, fullPwm, pwm - (pwmFullAdc / 2), pwmFullAdc / 2));
+				if (pwm > middleOfPWMRange) {
+					setTargetRgb(setColorInBetween(halfPwm, fullPwm, pwm - middleOfPWMRange, middleOfPWMRange));
 				} else {
-					setTargetRgb(setColorInBetween(zeroPWM, halfPwm, pwm, pwmFullAdc / 2));
+					setTargetRgb(setColorInBetween(zeroPWM, halfPwm, pwm, middleOfPWMRange));
 				}
 			} else {
 				setTargetRgb(rainbowArr[arrInd]);

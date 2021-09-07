@@ -52,7 +52,7 @@ void initPwm() {
 	
 	// Timer 1  config
 	TCCR1 |=  (1 << CS12) | (1 << CS11) | (1 << CS10); // CK/64
-	GTCCR |= (1 << PWM1B) | (1 << COM1B0); // Enable PWM1B non inverting mod
+	GTCCR |= (1 << PWM1B) | (1 << COM1B1); // Enable PWM1B non inverting mod
 	OCR1C = 255;
 }
 
@@ -92,7 +92,8 @@ void transition() {
 	transitionOver = (currentR == targetR && currentG == targetG && currentB == targetB);
 	cycleR = currentR;
 	cycleG = currentG;
-	cycleB = currentB;
+	if (currentB < 2) cycleB = 2; // do not know, probably bug in simulator, but if OCR1B < 2, output is always high, 
+		else cycleB = currentB;  // in this particular case, we can live with duty cycle = 2.
 }
 
 ISR(TIMER0_OVF_vect) {
