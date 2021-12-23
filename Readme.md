@@ -1,4 +1,5 @@
-#PWM to RGB converter
+PWM to RGB converter
+====================
 
 Firmware for AVR microcontroller to work as a converter from PWM signal (PC fan control) to signals for RGB LED strip (not ARGB!). 
 The target device is ATTiny85, though may be ported to any device having at least 3 PWM channels (in ATTiny 85 there are 
